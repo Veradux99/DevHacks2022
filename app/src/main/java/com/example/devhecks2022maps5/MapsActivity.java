@@ -45,6 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList<markerLocation> markerLocations = new ArrayList<>();
     ArrayList<markerLocation> markerLocations2 = new ArrayList<>();
     ArrayList<markerLocation> markerLocations3 = new ArrayList<>();
+    HashSet<markerLocation> hashSet = new HashSet<>();
     Polyline polyline;
     MarkerOptions markerSpital;
 
@@ -135,6 +136,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     markerLocations2.clear();
                     markerLocations3.clear();
+
+                    hashSet.clear();
                 }
 
                 MarkerOptions markerSpitalSpital = new MarkerOptions();
@@ -226,7 +229,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             Double bufferLatitutePoliLocation = poliLocations2.get(j).latitude;
                                             Double bufferLongitudePoliLocation = poliLocations2.get(j).longitude;
                                             if(Double.parseDouble(bufferLatitudeMarkerLocations)== bufferLatitutePoliLocation && Double.parseDouble(bufferLongitudeMarkerLocations)== bufferLongitudePoliLocation) {
-                                                markerLocations3.add(markerLocations2.get(i));
+                                                hashSet.add(markerLocations2.get(i));
                                                 //markerLocations2.remove(i);
                                                 //if(i == markerLocations2.size())
                                                 //    break;
@@ -235,6 +238,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         }
                                     }
 
+                                    markerLocations3.addAll(hashSet);
 
                                     for(int i=0;i<markerLocations3.size();i++) {
                                         MarkerOptions markerSpital = new MarkerOptions();
@@ -244,9 +248,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }
 
                                     JSONArray jsonArrayToSend = new JSONArray();
-                                    JSONObject jsonObjectToSend = new JSONObject();
                                     try {
                                         for(int i=0;i<markerLocations3.size();i++) {
+                                            JSONObject jsonObjectToSend = new JSONObject();
+                                            Log.e("TEST",markerLocations3.get(i).id.toString()+"|"+markerLocations3.get(i).name.toString()+"|"+markerLocations3.get(i).mac.toString());
                                             jsonObjectToSend.put("deviceID", markerLocations3.get(i).id);
                                             jsonObjectToSend.put("deviceName",markerLocations3.get(i).name);
                                             jsonObjectToSend.put("macAdress",markerLocations3.get(i).mac);
