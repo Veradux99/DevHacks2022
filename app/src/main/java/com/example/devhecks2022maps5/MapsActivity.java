@@ -178,7 +178,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         poliLocations.add(end_location);
                                     }
 
-
                                     Integer sizeSmecherRau = poliLocations.size();
                                     for(int i=0;i<sizeSmecherRau;i++){
                                         poliLocations3.add(poliLocations.get(i));
@@ -201,6 +200,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         poliLocations.add(new LatLng(calculLat,calculLong));
                                     }
 
+
                                     for(int i=0;i<poliLocations.size();i++)
                                     {
                                         polyline = googleMap.addPolyline(new PolylineOptions()
@@ -208,8 +208,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                 .addAll(poliLocations));
                                     }
                                     for(int i=0;i<poliLocations.size();i++){
-                                        String bufferLatitudePoliLocation = new DecimalFormat("##.#####").format(poliLocations.get(i).latitude).replace(",",".");
-                                        String bufferLongitudePoliLocation = new DecimalFormat("##.#####").format(poliLocations.get(i).longitude).replace(",",".");
+                                        String bufferLatitudePoliLocation = new DecimalFormat("##.###").format(poliLocations.get(i).latitude).replace(",",".");
+                                        String bufferLongitudePoliLocation = new DecimalFormat("##.###").format(poliLocations.get(i).longitude).replace(",",".");
                                          poliLocations2.add(new LatLng(Double.parseDouble(bufferLatitudePoliLocation),Double.parseDouble(bufferLongitudePoliLocation)));
                                     }
 
@@ -220,17 +220,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Log.e("numarSmek",numarSmek.toString());
 
                                     for(int i=0;i<markerLocations2.size();i++){
-                                        String bufferLatitudeMarkerLocations = new DecimalFormat("##.#####").format(markerLocations.get(i).location.latitude).replace(",",".");
-                                        String bufferLongitudeMarkerLocations = new DecimalFormat("##.#####").format(markerLocations.get(i).location.longitude).replace(",",".");
+                                        String bufferLatitudeMarkerLocations = new DecimalFormat("##.###").format(markerLocations.get(i).location.latitude).replace(",",".");
+                                        String bufferLongitudeMarkerLocations = new DecimalFormat("##.###").format(markerLocations.get(i).location.longitude).replace(",",".");
                                         for(int j=0;j<poliLocations2.size();j++) {
                                             Double bufferLatitutePoliLocation = poliLocations2.get(j).latitude;
                                             Double bufferLongitudePoliLocation = poliLocations2.get(j).longitude;
                                             if(Double.parseDouble(bufferLatitudeMarkerLocations)== bufferLatitutePoliLocation && Double.parseDouble(bufferLongitudeMarkerLocations)== bufferLongitudePoliLocation) {
                                                 markerLocations3.add(markerLocations2.get(i));
-                                                markerLocations2.remove(i);
-                                                if(i == markerLocations2.size())
-                                                    break;
-                                                j=0;
+                                                //markerLocations2.remove(i);
+                                                //if(i == markerLocations2.size())
+                                                //    break;
+                                                //j=0;
                                             }
                                         }
                                     }
@@ -254,14 +254,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             jsonObjectToSend.put("longitude",markerLocations3.get(i).location.longitude);
                                             jsonArrayToSend.put(i,jsonObjectToSend);
                                         }
-                                        JSONObject jsonObjectToSend2 = new JSONObject();
-                                        jsonObjectToSend2.put("Nelu",jsonArrayToSend);
-                                        Log.e("celMaiSmek",jsonObjectToSend2.toString());
+                                        Log.e("celMaiSmek",jsonArrayToSend.toString());
                                         RequestQueue queue2 = Volley.newRequestQueue(MapsActivity.this);
-                                        JsonObjectRequest jsonObjectRequest2 = new JsonObjectRequest(Request.Method.POST, "http://192.168.0.100:8001/",jsonObjectToSend2,
-                                                new Response.Listener<JSONObject>() {
+                                        JsonArrayRequest jsonObjectRequest2 = new JsonArrayRequest(Request.Method.POST, "http://192.168.0.100:8001/",jsonArrayToSend,
+                                                new Response.Listener<JSONArray>() {
                                                     @Override
-                                                    public void onResponse(JSONObject response) {
+                                                    public void onResponse(JSONArray response) {
                                                         // Display the first 500 characters of the response string.
 
                                                         Log.e("response",response.toString());
