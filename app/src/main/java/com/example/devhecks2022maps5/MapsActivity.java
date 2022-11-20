@@ -39,6 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     ArrayList markerPoints = new ArrayList();
     Marker marker = null;
     ArrayList<poliLocation> poliLocations = new ArrayList<poliLocation>();
+    ArrayList<poliLocation> poliLocations3 = new ArrayList<poliLocation>();
     ArrayList<markerLocation> markerLocations = new ArrayList<markerLocation>();
     ArrayList<LatLng> poliLocations2 = new ArrayList<LatLng>();
     ArrayList<markerLocation> markerLocations2 = new ArrayList<markerLocation>();
@@ -73,13 +74,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 for(int i=0;i<response.length();i++){
                                     JSONObject jsonObject = response.getJSONObject(i);
 
+                                    Integer id = jsonObject.getInt("deviceID");
                                     String deviceName = jsonObject.getString("deviceName");
+                                    String mac = jsonObject.getString("macAddress");
                                     LatLng latLng = new LatLng(jsonObject.getDouble("latitude"),jsonObject.getDouble("longitude"));
                                     markerSpital = new MarkerOptions();
                                     markerSpital.position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
                                     markerSpital.title(deviceName);
                                     mMap.addMarker(markerSpital);
-                                    markerLocations.add(new markerLocation(deviceName,latLng));
+                                    markerLocations.add(new markerLocation(id,deviceName,mac,latLng));
                                 }
                             } catch (JSONException e) {
                                 Log.e("errorParseOnCreate",e.toString());
@@ -117,13 +120,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(@NonNull LatLng latLng) {
+                googleMap.clear();
                 if (marker != null) {
                     marker.remove();
                     markerPoints.remove(1);
                     poliLocations.clear();
                     polyline.remove();
-                    googleMap.clear();
                     markerLocations.clear();
+
                     /*
                     for(int i=0;i<markerLocations.size();i++) {
                         MarkerOptions markerSpital = new MarkerOptions();
@@ -133,6 +137,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     */
                 }
+
+                MarkerOptions markerSpitalSpital = new MarkerOptions();
+                markerSpitalSpital.position(spital).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                markerSpitalSpital.title("Spitalul Floreasca");
+                googleMap.addMarker(markerSpitalSpital);
+
                 MarkerOptions markerOption = new MarkerOptions();
                 markerOption.position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 marker = googleMap.addMarker(markerOption);
@@ -170,15 +180,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         LatLng end_location = new LatLng(jsonObjectEndLocation.getDouble("lat"), jsonObjectEndLocation.getDouble("lng"));
                                         poliLocations.add(new poliLocation(start_location,end_location));
                                     }
+
                                     /*
                                     Integer sizeSmecherRau = poliLocations.size();
-                                    for(int i=0;i<sizeSmecherRau;i++){
+                                    for(int i=0;i+2<sizeSmecherRau;i++){
+                                        poliLocations3.add(new poliLocation(new LatLng(poliLocations.get(i).start.latitude,poliLocations.get(i).start.longitude),new LatLng(poliLocations.get(i).end.latitude,poliLocations.get(i).end.longitude)));
                                         Double calcul1 = poliLocations.get(i).end.latitude+poliLocations.get(i+1).start.latitude;
                                         Double calcul2 = poliLocations.get(i).end.longitude+poliLocations.get(i+1).start.longitude;
-                                        poliLocations.add(new poliLocation(new LatLng(poliLocations.get(i).start.latitude,poliLocations.get(i).start.longitude),new LatLng(calcul1/2,calcul2/2)));
-                                    }
-
-                                     */
+                                        poliLocations3.add(new poliLocation(new LatLng(poliLocations.get(i).start.latitude,poliLocations.get(i).start.longitude),new LatLng(calcul1/2,calcul2/2)));
+                                            i++;
+                                        }
+                                    */
                                     for(int i=0;i<poliLocations.size();i++){
                                         polyline = googleMap.addPolyline(new PolylineOptions()
                                                 .clickable(true)
@@ -186,13 +198,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                                         poliLocations.get(i).end));
                                     }
                                     for(int i=0;i<poliLocations.size();i++){
-                                        String bufferLatitudePoliLocation = new DecimalFormat("##.####").format(poliLocations.get(i).end.latitude).replace(",",".");
-                                        String bufferLongitudePoliLocation = new DecimalFormat("##.####").format(poliLocations.get(i).end.longitude).replace(",",".");
+                                        String bufferLatitudePoliLocation = new DecimalFormat("##.##").format(poliLocations.get(i).end.latitude).replace(",",".");
+                                        String bufferLongitudePoliLocation = new DecimalFormat("##.##").format(poliLocations.get(i).end.longitude).replace(",",".");
                                          poliLocations2.add(new LatLng(Double.parseDouble(bufferLatitudePoliLocation),Double.parseDouble(bufferLongitudePoliLocation)));
                                     }
                                     for(int i=0;i<markerLocations.size();i++){
-                                        String bufferLatitudeMarkerLocations = new DecimalFormat("##.####").format(markerLocations.get(i).location.latitude).replace(",",".");
-                                        String bufferLongitudeMarkerLocations = new DecimalFormat("##.####").format(markerLocations.get(i).location.longitude).replace(",",".");
+                                        String bufferLatitudeMarkerLocations = new DecimalFormat("##.##").format(markerLocations.get(i).location.latitude).replace(",",".");
+                                        String bufferLongitudeMarkerLocations = new DecimalFormat("##.##").format(markerLocations.get(i).location.longitude).replace(",",".");
                                         for(int j=0;j<poliLocations.size();j++) {
                                             Double bufferLatitutePoliLocation = poliLocations2.get(j).latitude;
                                             Double bufferLongitudePoliLocation = poliLocations2.get(j).longitude;
@@ -220,11 +232,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 queue.add(jsonObjectRequest);
 
+                JSONArray jsonArrayToSend = new JSONArray();
                 JSONObject jsonObjectToSend = new JSONObject();
                 try {
-                    jsonObjectToSend.put("objects",markerLocations2);
+                    for(int i=0;i<markerLocations2.size();i++) {
+                        jsonObjectToSend.put("deviceID", markerLocations2.get(i).id);
+                        jsonObjectToSend.put("deviceName",  markerLocations2.get(i).name);
+                        jsonObjectToSend.put("macAdress",markerLocations2.get(i).mac);
+                        jsonObjectToSend.put("latitude",markerLocations2.get(i).location.latitude);
+                        jsonObjectToSend.put("longitude",markerLocations2.get(i).location.longitude);
+                        jsonArrayToSend.put(i,jsonObjectToSend);
+                    }
+                    JSONObject jsonObjectToSend2 = new JSONObject();
+                    jsonObjectToSend2.put("Nelu",jsonArrayToSend);
+                    Log.e("celMaiSmek",jsonObjectToSend2.toString());
                     RequestQueue queue2 = Volley.newRequestQueue(MapsActivity.this);
-                    JsonObjectRequest jsonObjectRequest2 = new JsonObjectRequest(Request.Method.POST, "http://192.168.0.100:8001/",jsonObjectToSend,
+                    JsonObjectRequest jsonObjectRequest2 = new JsonObjectRequest(Request.Method.POST, "http://192.168.0.100:8001/",jsonObjectToSend2,
                             new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {
