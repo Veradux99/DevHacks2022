@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -38,11 +39,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ActivityMapsBinding binding;
     ArrayList markerPoints = new ArrayList();
     Marker marker = null;
-    ArrayList<poliLocation> poliLocations = new ArrayList<poliLocation>();
-    ArrayList<poliLocation> poliLocations3 = new ArrayList<poliLocation>();
-    ArrayList<markerLocation> markerLocations = new ArrayList<markerLocation>();
-    ArrayList<LatLng> poliLocations2 = new ArrayList<LatLng>();
-    ArrayList<markerLocation> markerLocations2 = new ArrayList<markerLocation>();
+    ArrayList<LatLng> poliLocations = new ArrayList<>();
+    ArrayList<LatLng> poliLocations2 = new ArrayList<>();
+    ArrayList<LatLng> poliLocations3 = new ArrayList<>();
+    ArrayList<markerLocation> markerLocations = new ArrayList<>();
+    ArrayList<markerLocation> markerLocations2 = new ArrayList<>();
+    ArrayList<markerLocation> markerLocations3 = new ArrayList<>();
     Polyline polyline;
     MarkerOptions markerSpital;
 
@@ -124,18 +126,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (marker != null) {
                     marker.remove();
                     markerPoints.remove(1);
-                    poliLocations.clear();
-                    polyline.remove();
-                    markerLocations.clear();
 
-                    /*
-                    for(int i=0;i<markerLocations.size();i++) {
-                        MarkerOptions markerSpital = new MarkerOptions();
-                        markerSpital.position(markerLocations.get(i).location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-                        markerSpital.title(markerLocations.get(i).name);
-                        mMap.addMarker(markerSpital);
-                    }
-                    */
+                    poliLocations.clear();
+                    poliLocations2.clear();
+                    poliLocations3.clear();
+
+                    polyline.remove();
+
+                    markerLocations2.clear();
+                    markerLocations3.clear();
                 }
 
                 MarkerOptions markerSpitalSpital = new MarkerOptions();
@@ -152,7 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 LatLng origin = (LatLng) markerPoints.get(0);
                 LatLng dest = (LatLng) markerPoints.get(1);
-
+                poliLocations.add(origin);
 
                 String originString=Double.toString(origin.latitude)+","+Double.toString(origin.longitude);
                 String destString=Double.toString(dest.latitude)+","+Double.toString(dest.longitude);
@@ -174,51 +173,112 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     JSONArray jsonArray3 = jsonObject2.getJSONArray("steps");
                                     for(int i=0;i<jsonArray3.length();i++) {
                                         JSONObject jsonObject3 = jsonArray3.getJSONObject(i);
-                                        JSONObject jsonObjectStartLocation = jsonObject3.getJSONObject("start_location");
                                         JSONObject jsonObjectEndLocation = jsonObject3.getJSONObject("end_location");
-                                        LatLng start_location = new LatLng(jsonObjectStartLocation.getDouble("lat"), jsonObjectStartLocation.getDouble("lng"));
                                         LatLng end_location = new LatLng(jsonObjectEndLocation.getDouble("lat"), jsonObjectEndLocation.getDouble("lng"));
-                                        poliLocations.add(new poliLocation(start_location,end_location));
+                                        poliLocations.add(end_location);
                                     }
 
-                                    /*
+
                                     Integer sizeSmecherRau = poliLocations.size();
-                                    for(int i=0;i+2<sizeSmecherRau;i++){
-                                        poliLocations3.add(new poliLocation(new LatLng(poliLocations.get(i).start.latitude,poliLocations.get(i).start.longitude),new LatLng(poliLocations.get(i).end.latitude,poliLocations.get(i).end.longitude)));
-                                        Double calcul1 = poliLocations.get(i).end.latitude+poliLocations.get(i+1).start.latitude;
-                                        Double calcul2 = poliLocations.get(i).end.longitude+poliLocations.get(i+1).start.longitude;
-                                        poliLocations3.add(new poliLocation(new LatLng(poliLocations.get(i).start.latitude,poliLocations.get(i).start.longitude),new LatLng(calcul1/2,calcul2/2)));
-                                            i++;
+                                    for(int i=0;i<sizeSmecherRau;i++){
+                                        poliLocations3.add(poliLocations.get(i));
+                                        if(i+1==sizeSmecherRau)
+                                            break;
+                                        Double calculLat = (poliLocations.get(i).latitude+poliLocations.get(i+1).latitude)/2;
+                                        Double calculLong = (poliLocations.get(i).longitude+poliLocations.get(i+1).longitude)/2;
+                                        poliLocations3.add(new LatLng(calculLat,calculLong));
                                         }
-                                    */
-                                    for(int i=0;i<poliLocations.size();i++){
+
+                                    //TEST
+                                    poliLocations.clear();
+                                    sizeSmecherRau = poliLocations3.size();
+                                    for(int i=0;i<sizeSmecherRau;i++){
+                                        poliLocations.add(poliLocations3.get(i));
+                                        if(i+1==sizeSmecherRau)
+                                            break;
+                                        Double calculLat = (poliLocations3.get(i).latitude+poliLocations3.get(i+1).latitude)/2;
+                                        Double calculLong = (poliLocations3.get(i).longitude+poliLocations3.get(i+1).longitude)/2;
+                                        poliLocations.add(new LatLng(calculLat,calculLong));
+                                    }
+
+                                    for(int i=0;i<poliLocations.size();i++)
+                                    {
                                         polyline = googleMap.addPolyline(new PolylineOptions()
                                                 .clickable(true)
-                                                .add(poliLocations.get(i).start,
-                                                        poliLocations.get(i).end));
+                                                .addAll(poliLocations));
                                     }
                                     for(int i=0;i<poliLocations.size();i++){
-                                        String bufferLatitudePoliLocation = new DecimalFormat("##.##").format(poliLocations.get(i).end.latitude).replace(",",".");
-                                        String bufferLongitudePoliLocation = new DecimalFormat("##.##").format(poliLocations.get(i).end.longitude).replace(",",".");
+                                        String bufferLatitudePoliLocation = new DecimalFormat("##.#####").format(poliLocations.get(i).latitude).replace(",",".");
+                                        String bufferLongitudePoliLocation = new DecimalFormat("##.#####").format(poliLocations.get(i).longitude).replace(",",".");
                                          poliLocations2.add(new LatLng(Double.parseDouble(bufferLatitudePoliLocation),Double.parseDouble(bufferLongitudePoliLocation)));
                                     }
-                                    for(int i=0;i<markerLocations.size();i++){
-                                        String bufferLatitudeMarkerLocations = new DecimalFormat("##.##").format(markerLocations.get(i).location.latitude).replace(",",".");
-                                        String bufferLongitudeMarkerLocations = new DecimalFormat("##.##").format(markerLocations.get(i).location.longitude).replace(",",".");
-                                        for(int j=0;j<poliLocations.size();j++) {
+
+
+                                    markerLocations2.addAll(markerLocations);
+
+                                    Integer numarSmek = markerLocations2.size();
+                                    Log.e("numarSmek",numarSmek.toString());
+
+                                    for(int i=0;i<markerLocations2.size();i++){
+                                        String bufferLatitudeMarkerLocations = new DecimalFormat("##.#####").format(markerLocations.get(i).location.latitude).replace(",",".");
+                                        String bufferLongitudeMarkerLocations = new DecimalFormat("##.#####").format(markerLocations.get(i).location.longitude).replace(",",".");
+                                        for(int j=0;j<poliLocations2.size();j++) {
                                             Double bufferLatitutePoliLocation = poliLocations2.get(j).latitude;
                                             Double bufferLongitudePoliLocation = poliLocations2.get(j).longitude;
                                             if(Double.parseDouble(bufferLatitudeMarkerLocations)== bufferLatitutePoliLocation && Double.parseDouble(bufferLongitudeMarkerLocations)== bufferLongitudePoliLocation) {
-                                                markerLocations2.add(markerLocations.get(i));
+                                                markerLocations3.add(markerLocations2.get(i));
+                                                markerLocations2.remove(i);
+                                                if(i == markerLocations2.size())
+                                                    break;
+                                                j=0;
                                             }
                                         }
                                     }
-                                    for(int i=0;i<markerLocations2.size();i++) {
+
+
+                                    for(int i=0;i<markerLocations3.size();i++) {
                                         MarkerOptions markerSpital = new MarkerOptions();
-                                        markerSpital.position(markerLocations2.get(i).location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-                                        markerSpital.title(markerLocations2.get(i).name);
+                                        markerSpital.position(markerLocations3.get(i).location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
+                                        markerSpital.title(markerLocations3.get(i).name);
                                         mMap.addMarker(markerSpital);
                                     }
+
+                                    JSONArray jsonArrayToSend = new JSONArray();
+                                    JSONObject jsonObjectToSend = new JSONObject();
+                                    try {
+                                        for(int i=0;i<markerLocations3.size();i++) {
+                                            jsonObjectToSend.put("deviceID", markerLocations3.get(i).id);
+                                            jsonObjectToSend.put("deviceName",markerLocations3.get(i).name);
+                                            jsonObjectToSend.put("macAdress",markerLocations3.get(i).mac);
+                                            jsonObjectToSend.put("latitude",markerLocations3.get(i).location.latitude);
+                                            jsonObjectToSend.put("longitude",markerLocations3.get(i).location.longitude);
+                                            jsonArrayToSend.put(i,jsonObjectToSend);
+                                        }
+                                        JSONObject jsonObjectToSend2 = new JSONObject();
+                                        jsonObjectToSend2.put("Nelu",jsonArrayToSend);
+                                        Log.e("celMaiSmek",jsonObjectToSend2.toString());
+                                        RequestQueue queue2 = Volley.newRequestQueue(MapsActivity.this);
+                                        JsonObjectRequest jsonObjectRequest2 = new JsonObjectRequest(Request.Method.POST, "http://192.168.0.100:8001/",jsonObjectToSend2,
+                                                new Response.Listener<JSONObject>() {
+                                                    @Override
+                                                    public void onResponse(JSONObject response) {
+                                                        // Display the first 500 characters of the response string.
+
+                                                        Log.e("response",response.toString());
+
+                                                    }
+                                                }, new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                Log.e("errorPRIMITKAKA",error.toString());
+                                            }
+                                        });
+
+                                        queue2.add(jsonObjectRequest2);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -229,44 +289,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Log.e("error",error.toString());
                     }
                 });
-
                 queue.add(jsonObjectRequest);
 
-                JSONArray jsonArrayToSend = new JSONArray();
-                JSONObject jsonObjectToSend = new JSONObject();
-                try {
-                    for(int i=0;i<markerLocations2.size();i++) {
-                        jsonObjectToSend.put("deviceID", markerLocations2.get(i).id);
-                        jsonObjectToSend.put("deviceName",  markerLocations2.get(i).name);
-                        jsonObjectToSend.put("macAdress",markerLocations2.get(i).mac);
-                        jsonObjectToSend.put("latitude",markerLocations2.get(i).location.latitude);
-                        jsonObjectToSend.put("longitude",markerLocations2.get(i).location.longitude);
-                        jsonArrayToSend.put(i,jsonObjectToSend);
-                    }
-                    JSONObject jsonObjectToSend2 = new JSONObject();
-                    jsonObjectToSend2.put("Nelu",jsonArrayToSend);
-                    Log.e("celMaiSmek",jsonObjectToSend2.toString());
-                    RequestQueue queue2 = Volley.newRequestQueue(MapsActivity.this);
-                    JsonObjectRequest jsonObjectRequest2 = new JsonObjectRequest(Request.Method.POST, "http://192.168.0.100:8001/",jsonObjectToSend2,
-                            new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    // Display the first 500 characters of the response string.
 
-                                        Log.e("response",response.toString());
-
-                                }
-                            }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.e("errorPRIMITKAKA",error.toString());
-                        }
-                    });
-
-                    queue2.add(jsonObjectRequest2);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
 
 
             }
