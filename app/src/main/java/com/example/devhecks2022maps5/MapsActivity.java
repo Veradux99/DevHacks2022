@@ -254,7 +254,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             Log.e("TEST",markerLocations3.get(i).id.toString()+"|"+markerLocations3.get(i).name.toString()+"|"+markerLocations3.get(i).mac.toString());
                                             jsonObjectToSend.put("deviceID", markerLocations3.get(i).id);
                                             jsonObjectToSend.put("deviceName",markerLocations3.get(i).name);
-                                            jsonObjectToSend.put("macAdress",markerLocations3.get(i).mac);
+                                            jsonObjectToSend.put("macAddress",markerLocations3.get(i).mac);
                                             jsonObjectToSend.put("latitude",markerLocations3.get(i).location.latitude);
                                             jsonObjectToSend.put("longitude",markerLocations3.get(i).location.longitude);
                                             jsonArrayToSend.put(i,jsonObjectToSend);
